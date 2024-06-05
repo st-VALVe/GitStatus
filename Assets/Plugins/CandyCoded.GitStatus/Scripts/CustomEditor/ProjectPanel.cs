@@ -27,21 +27,20 @@ namespace CandyCoded.GitStatus
         private static void ProjectWindowItemOnGui(string guid, Rect selectionRect)
         {
 
-            if (!Event.current.type.Equals(EventType.Repaint))
+            // Check if GitStatusPanel is open
+            var windows = Resources.FindObjectsOfTypeAll<GitStatusPanel>();
+            if (windows == null || windows.Length == 0)
             {
 
                 return;
 
             }
+            
+            if (!Event.current.type.Equals(EventType.Repaint)) return;
 
-            if (string.IsNullOrEmpty(guid))
-            {
+            if (string.IsNullOrEmpty(guid)) return;
 
-                return;
-
-            }
-
-            var path = AssetDatabase.GUIDToAssetPath(guid);
+            var path = NormalizePath(AssetDatabase.GUIDToAssetPath(guid));
 
             var iconSize = Mathf.Max(selectionRect.height * ICON_SCALE, EditorGUIUtility.singleLineHeight);
 
@@ -52,20 +51,29 @@ namespace CandyCoded.GitStatus
                 iconSize - ICON_PADDING);
 
             if (GitStatus.changedFiles.Contains(path))
-            {
-
                 GUI.DrawTexture(rect, GitIcons.Changed, ScaleMode.ScaleToFit);
-
-            }
             else if (GitStatus.untrackedFiles.Contains(path))
-            {
-
                 GUI.DrawTexture(rect, GitIcons.Untracked, ScaleMode.ScaleToFit);
-
-            }
-
+            else if (IsInChangedFolders(path)) GUI.DrawTexture(rect, GitIcons.Changed, ScaleMode.ScaleToFit);
+            else if (IsInUntrackedFolders(path)) GUI.DrawTexture(rect, GitIcons.Untracked, ScaleMode.ScaleToFit);
         }
 
+            }
+
+        private static bool IsInChangedFolders(string path)
+        {
+            return GitStatus.changedFolders.Any(folder => path.Equals(folder) && (path.Length == folder.Length || path[folder.Length] == '/'));
+        }
+        
+        private static bool IsInUntrackedFolders(string path)
+        {
+            return GitStatus.untrackedFolders.Any(folder => path.Equals(folder) && (path.Length == folder.Length || path[folder.Length] == '/'));
+        }
+
+        private static string NormalizePath(string path)
+        {
+            return path.Replace('\\', '/');
+        }
     }
 
 }

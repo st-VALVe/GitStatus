@@ -92,17 +92,72 @@ namespace CandyCoded.GitStatus
 
             }
 
-            GUILayout.Label($"Number of Changes: {GitStatus.changedFiles?.Length}");
-            GUILayout.Label($"Untracked Files: {GitStatus.untrackedFiles?.Length}");
-            GUILayout.Label($"Last Updated: {GitStatus.lastUpdated}");
-
-            if (GUILayout.Button("Refresh"))
+            // Create a custom style that looks like a hyperlink
+            var hyperlinkStyle = new GUIStyle(GUI.skin.label)
             {
+                hover = { textColor = Color.cyan }
+            };
+            
+            var headingStyle = new GUIStyle(GUI.skin.label)
+            {
+                normal = { textColor = Color.yellow },
+            };
 
-                GitStatus.Update();
+            // Display changed files
+            if (GitStatus.changedFiles is { Length: > 0 })
+            {
+                GUILayout.Label($"Changed Files: {GitStatus.changedFiles?.Length} ", headingStyle);
+                if (GitStatus.changedFiles != null)
+                    foreach (var file in GitStatus.changedFiles)
+                        if (GUILayout.Button(new GUIContent(file), hyperlinkStyle))
+                        {
+                            if (file.EndsWith(".meta"))
+                            {
+                                // Get the folder path
+                                string folderPath = System.IO.Path.GetDirectoryName(file);
+                                // Load the folder
+                                UnityEngine.Object folder = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(folderPath);
+                                EditorGUIUtility.PingObject(folder);
+                            }
+                            else
+                            {
+                                // Load the asset
+                                UnityEngine.Object asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(file);
+                                EditorGUIUtility.PingObject(asset);
+                            }
+                        }
 
             }
 
+            // Display untracked files
+            if (GitStatus.untrackedFiles is { Length: > 0 })
+            {
+                GUILayout.Label($"Untracked Files: {GitStatus.untrackedFiles?.Length} ", headingStyle);
+                if (GitStatus.untrackedFiles != null)
+                    foreach (var file in GitStatus.untrackedFiles)
+                        if (GUILayout.Button(new GUIContent(file), hyperlinkStyle))
+                        {
+                            if (file.EndsWith(".meta"))
+                            {
+                                // Get the folder path
+                                string folderPath = System.IO.Path.GetDirectoryName(file);
+                                // Load the folder
+                                UnityEngine.Object folder = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(folderPath);
+                                EditorGUIUtility.PingObject(folder);
+                            }
+                            else
+                            {
+                                // Load the asset
+                                UnityEngine.Object asset = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>(file);
+                                EditorGUIUtility.PingObject(asset);
+                            }
+                        }
+
+            }
+
+            if (GUILayout.Button("Refresh")) GitStatus.Update();
+
+            GUILayout.Label($"Last Updated: {GitStatus.lastUpdated}", headingStyle);
         }
 
         private void Update()

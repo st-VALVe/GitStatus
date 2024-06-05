@@ -2,6 +2,8 @@
 
 #if UNITY_EDITOR
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using UnityEditor;
 
@@ -23,6 +25,10 @@ namespace CandyCoded.GitStatus
         public static string[] changedFiles = { };
 
         public static string[] untrackedFiles = { };
+
+        public static HashSet<string> changedFolders = new();
+        
+        public static HashSet<string> untrackedFolders = new();
 
         public static DateTime lastUpdated = DateTime.Now;
 
@@ -68,11 +74,54 @@ namespace CandyCoded.GitStatus
             changedFiles = await Git.ChangedFiles();
             untrackedFiles = await Git.UntrackedFiles();
 
-            lastUpdated = DateTime.Now;
+            UpdateChangedFolders();
+            UpdateUntrackedFolders();
 
+            lastUpdated = DateTime.Now;
         }
 
-    }
+        private static void UpdateChangedFolders()
+        {
+            changedFolders.Clear();
 
+            if (changedFiles == null) return;
+            foreach (var file in changedFiles)
+                AddFoldersForChangedFile(file);
+        }
+        
+        private static void UpdateUntrackedFolders()
+        {
+            untrackedFolders.Clear();
+
+            if (untrackedFiles == null) return;
+            foreach (var file in untrackedFiles)
+                AddFoldersForUntrackedFile(file);
+        }
+
+        private static void AddFoldersForChangedFile(string filePath)
+        {
+            var directory = Path.GetDirectoryName(filePath);
+            while (!string.IsNullOrEmpty(directory) && directory != "Assets")
+            {
+                changedFolders.Add(NormalizePath(directory));
+                directory = Path.GetDirectoryName(directory);
+            }
+        }
+        
+        private static void AddFoldersForUntrackedFile(string filePath)
+        {
+            var directory = Path.GetDirectoryName(filePath);
+            while (!string.IsNullOrEmpty(directory) && directory != "Assets")
+            {
+                untrackedFolders.Add(NormalizePath(directory));
+                directory = Path.GetDirectoryName(directory);
+            }
+        }
+
+        private static string NormalizePath(string path)
+        {
+            return path.Replace('\\', '/');
+        }
+    }
 }
 #endif
