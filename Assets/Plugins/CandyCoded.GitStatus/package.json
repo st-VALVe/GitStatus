@@ -3,6 +3,8 @@
   "displayName": "GitStatus",
   "version": "2.2.0",
   "unity": "2019.2",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   "description": "A simple git status panel for Unity.",
   "license": "MIT",
   "keywords": [
@@ -15,9 +17,9 @@
     "email": "hello@scottdoxey.com",
     "homepage": "http://scottdoxey.com/"
   },
-  "homepage": "https://github.com/CandyCoded/GitStatus",
+  "homepage": "https://github.com/st-VALVe/GitStatus",
   "repository": {
     "type": "git",
-    "url": "git@github.com:CandyCoded/GitStatus.git"
+    "url": "git@github.com:st-VALVe/GitStatus.git"
   }
 }
